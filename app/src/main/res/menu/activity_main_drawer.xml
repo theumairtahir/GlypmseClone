@@ -11,7 +11,7 @@
         <item
             android:id="@+id/navRequestLocation"
             android:icon="@drawable/ic_call_received_black_24dp"
-            android:title="Made Location" />
+            android:title="Request Location" />
     </group>
     <item android:title="">
         <menu>
