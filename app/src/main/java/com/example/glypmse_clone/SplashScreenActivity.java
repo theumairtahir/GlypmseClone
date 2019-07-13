@@ -6,13 +6,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 public class SplashScreenActivity extends AppCompatActivity {
-    private Handler mWaitHandler = new Handler();
+    private Handler waitHandler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_splash_screen);
-        mWaitHandler.postDelayed(new Runnable() {
+        waitHandler.postDelayed(new Runnable() {
 
             @Override
             public void run() {
@@ -37,6 +37,6 @@ public class SplashScreenActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mWaitHandler.removeCallbacksAndMessages(null);
+        waitHandler.removeCallbacksAndMessages(null);
     }
 }
