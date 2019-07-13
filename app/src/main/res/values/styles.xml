@@ -22,7 +22,7 @@
         <item name="android:textColor">@color/colorSecondaryDark</item>
     </style>
     <style name="AppTheme.Nav_Bottom_Button" parent="android:Widget.ImageButton">
-        <item name="android:background">@android:color/transparent</item>
+        <item name="background">@android:color/transparent</item>
     </style>
 
 </resources>
