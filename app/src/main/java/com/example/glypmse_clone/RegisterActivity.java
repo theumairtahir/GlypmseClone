@@ -18,6 +18,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         progressBar=findViewById(R.id.registerProgressBar);
         progressBar.setVisibility(View.INVISIBLE); //initially making the progress bar hidden
+        btnRegister=findViewById(R.id.btnRegister);
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
