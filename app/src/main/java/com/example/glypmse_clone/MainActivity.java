@@ -202,11 +202,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onSuccess(Location location) {
                 if(location!=null){
                     LatLng currentPosition=new LatLng(location.getLatitude(),location.getLongitude());
-                    //MarkerOptions userMarkerOptions= new MarkerOptions();
-                    //userMarkerOptions.title(userName);
-                    //userMarkerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_brightness_1_black_24dp));
                     map.addMarker(new MarkerOptions().position(currentPosition).title(userName).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_user_marker_round)));
-                    //map.addMarker(new MarkerOptions().);
                     map.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
                 }
             }
