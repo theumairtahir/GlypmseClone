@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -174,7 +175,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .width(5)
                 .color(Color.CYAN)
                 .add(activeUser.getLastPosition(),glympse.getDestination().getDestination()));
-        
+        map.addMarker(new MarkerOptions()
+                .position(glympse.getDestination().getDestination())
+                .title(glympse.getDestination().getName()));
+        map.animateCamera(CameraUpdateFactory.zoomBy(10));
     }
 
     private void initializeModel() {
@@ -253,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onSuccess(Location location) {
                 if(location!=null){
                     LatLng currentPosition=new LatLng(location.getLatitude(),location.getLongitude());
-                    map.addMarker(new MarkerOptions().position(currentPosition).title(activeUser.getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_user_marker_round)));
+                    map.addMarker(new MarkerOptions().position(currentPosition).title(activeUser.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                     map.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
                 }
             }
