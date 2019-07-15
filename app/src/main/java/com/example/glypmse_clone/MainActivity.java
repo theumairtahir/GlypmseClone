@@ -4,12 +4,16 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.example.glypmse_clone.Models.Destination;
+import com.example.glypmse_clone.Models.Glympse;
+import com.example.glypmse_clone.Models.User;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -19,6 +23,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -46,11 +52,19 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
     private GoogleMap map;
-    private String userName;
     ImageButton btnChangeMapType;
-    FusedLocationProviderClient fusedLocationProviderClient;
+    ImageButton btnActiveGlympse;
+
+    //Business components
+    User activeUser;
+    ArrayList<Glympse> lstActiveGlympses;
+
+    FusedLocationProviderClient fusedLocationProviderClient; //gets device last known location
     //Play Services
     private static final int MY_PERMISSION_REQUEST_CODE=7000;
     private static final int PLAY_SERVICE_RES_REQUEST=7001;
@@ -58,8 +72,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        userName="Me";
+        fusedLocationProviderClient= new FusedLocationProviderClient(this);
+        //initializing model from db
+        initializeModel();
         //binding the view components
+        btnActiveGlympse=findViewById(R.id.btnActiveGlympse);
+        btnActiveGlympse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                android.app.AlertDialog.Builder dialogBuider= new android.app.AlertDialog.Builder(MainActivity.this);
+                dialogBuider.setTitle("Active Glympses");
+                String[] activeGlympsesNames=new String[lstActiveGlympses.size()];
+                for (int i=0; i<activeGlympsesNames.length; i++){
+                    activeGlympsesNames[i]="Sent by: "+lstActiveGlympses.get(i).getSender().getName();
+                }
+                dialogBuider.setItems(activeGlympsesNames, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        updateGlympse(lstActiveGlympses.get(i));
+                    }
+                });
+                dialogBuider.show();
+            }
+        });
         btnChangeMapType = findViewById(R.id.btnChangeMapType);
         btnChangeMapType.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,6 +168,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mapFragment.getMapAsync(this);
     }
 
+    private void updateGlympse(Glympse glympse) {
+        map.addPolyline(new PolylineOptions()
+                .clickable(true)
+                .width(5)
+                .color(Color.CYAN)
+                .add(activeUser.getLastPosition(),glympse.getDestination().getDestination()));
+        
+    }
+
+    private void initializeModel() {
+        //will be replaced by DB values
+        lstActiveGlympses=new ArrayList<>();
+        activeUser=new User("Umair Tahir","03074172329","ut786","12345",getDeviceLatestLocation());
+        lstActiveGlympses.add(new Glympse(activeUser,new User("Sarim","03031234567","sarim123","12345",new LatLng(31.389280,74.240503)),60,true,"7/15/2019 06:52:00 PM",new Destination(new LatLng(31.461814,74.321742),"Model Town",60)));
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -202,10 +253,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onSuccess(Location location) {
                 if(location!=null){
                     LatLng currentPosition=new LatLng(location.getLatitude(),location.getLongitude());
-                    map.addMarker(new MarkerOptions().position(currentPosition).title(userName).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_user_marker_round)));
+                    map.addMarker(new MarkerOptions().position(currentPosition).title(activeUser.getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_user_marker_round)));
                     map.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
                 }
             }
         });
+    }
+    private LatLng getDeviceLatestLocation(){
+        final LatLng[] latestLocation = {null};
+        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if(location!=null){
+                    latestLocation[0] =new LatLng(location.getLatitude(),location.getLongitude());
+                    updateActiveUserLocation(latestLocation[0]);
+                }
+            }
+        });
+        return latestLocation[0];
+    }
+
+    private void updateActiveUserLocation(LatLng latestLocation) {
+        activeUser.setLastPosition(latestLocation);
     }
 }
