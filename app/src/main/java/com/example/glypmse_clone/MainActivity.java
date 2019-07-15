@@ -46,6 +46,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private GoogleMap map;
     ImageButton btnChangeMapType;
     ImageButton btnActiveGlympse;
+    TextView txtUserName;
 
     //Business components
     User activeUser;
@@ -139,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.setDrawerTitle(DrawerLayout.TEXT_ALIGNMENT_GRAVITY,activeUser.getName());
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -146,9 +149,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        //setting user name on the drawer text
+        View headerView=navigationView.getHeaderView(0);
+        TextView txtUserName=headerView.findViewById(R.id.txtDrawerUserName);
+        txtUserName.setText(activeUser.getName());
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        //MapFragment mapFragment=(MapFragment)getFragmentManager().findFragmentById(R.id.map);
+        //Initializing Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         //set the alignment of the zoom buttons of the google map
         @SuppressLint("ResourceType") View zoomControls = mapFragment.getView().findViewById(0x1);
@@ -167,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
         mapFragment.getMapAsync(this);
+
     }
 
     private void updateGlympse(Glympse glympse) {
@@ -243,11 +250,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getDeviceCurrentLocation();
             }
         }
-
-        // Add a marker in Sydney and move the camera
-        /*LatLng sydney = new LatLng(-34, 151);
-        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        map.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
     }
 
     @SuppressLint("MissingPermission")
