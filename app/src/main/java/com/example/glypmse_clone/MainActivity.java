@@ -56,6 +56,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private GoogleMap map;
     ImageButton btnChangeMapType;
     ImageButton btnActiveGlympse;
-    TextView txtUserName;
 
     //Business components
     User activeUser;
@@ -229,10 +231,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initializeModel() {
+        FirebaseAuth firebaseAuth=FirebaseAuth.getInstance();
+        FirebaseDatabase db=FirebaseDatabase.getInstance();
+        DatabaseReference users=db.getReference("users");
         //will be replaced by DB values
         lstActiveGlympses=new ArrayList<>();
-        activeUser=new User("Umair Tahir","03074172329","ut786","12345",getDeviceLatestLocation());
-        lstActiveGlympses.add(new Glympse(activeUser,new User("Sarim","03031234567","sarim123","12345",new LatLng(31.389280,74.240503)),60,true,"7/15/2019 06:52:00 PM",new Destination(new LatLng(31.461814,74.321742),"Model Town",60)));
+        activeUser=new User("Umair Tahir","03074172329","Pakistan",getDeviceLatestLocation());
+        lstActiveGlympses.add(new Glympse(activeUser,new User("Sarim","03031234567","Pakistan",new LatLng(31.389280,74.240503)),60,true,"7/15/2019 06:52:00 PM",new Destination(new LatLng(31.461814,74.321742),"Model Town",60)));
     }
 
     @Override

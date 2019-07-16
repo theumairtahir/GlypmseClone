@@ -21,4 +21,5 @@
     </string>
     <string name="Slogan">Share Your Where</string>
     <string name="title_activity_glympse_map">Map</string>
+    <string name="glympse_shared_preferences">pref_glympse</string>
 </resources>
