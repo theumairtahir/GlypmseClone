@@ -198,10 +198,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lstDirections.add(new LatLng(31.5247954,74.32377480000001));
         lstDirections.add(new LatLng(31.4753881,74.34377429999999));
         lstDirections.add(new LatLng(31.4618127,74.3217413));
+
         PolylineOptions polylineOptions= new PolylineOptions();
         polylineOptions.clickable(true).width(5).color(Color.CYAN);
-        for (LatLng position:
-             lstDirections) {
+
+        for (LatLng position : lstDirections) {
             polylineOptions.add(position);
         }
         map.addPolyline(polylineOptions);
