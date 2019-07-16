@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateGlympse(Glympse glympse) {
-        //Route route= new Route(activeUser.getLastPosition(),glympse.getDestination().getDestination(),getResources().getString(R.string.google_maps_key),this);
+        Route route= new Route(activeUser.getLastPosition(),glympse.getDestination().getDestination(),getResources().getString(R.string.google_maps_key),this);
 
         List<LatLng> lstDirections=new ArrayList<>();
         //Maintaining routes from user position to the destination
@@ -221,9 +221,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         map.addPolyline(polylineOptions);
 
+        String description="Distance: "+17 +"km"+" Time: "+36 +"min"+" Ferozepur Rd/Lahore – Kasur Rd";
         map.addMarker(new MarkerOptions()
                 .position(glympse.getDestination().getDestination())
-                .title(glympse.getDestination().getName()));
+                .title(glympse.getDestination().getName())
+                .snippet(description));
     }
 
     private void initializeModel() {
