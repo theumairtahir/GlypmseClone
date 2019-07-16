@@ -21,12 +21,10 @@ import java.util.List;
 
 public class Route {
     private List<LatLng> lstDirections;
-    private Activity callingActivity;
     private String startAddress, endAddress, timeRequired, distanceRequired, summary;
     private int timeRequiredValue, distanceRequiredValue;
 
     public Route(LatLng startPosition, LatLng endPosition, String key, Activity callingActivity) {
-        this.callingActivity=callingActivity;
         lstDirections=new ArrayList<>();
         //code to get the directions by requesting to the API by JSON
         final String startPointLat, startPointLng, endPointLat, endPointLng;
@@ -71,7 +69,6 @@ public class Route {
     }
 
     public Route(LatLng startPosition, LatLng endPosition, String mode, String key, Activity callingActivity) {
-        this.callingActivity=callingActivity;
         lstDirections=new ArrayList<>();
         //code to get the directions by requesting to the API by JSON
         final String startPointLat, startPointLng, endPointLat, endPointLng;
