@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.example.glypmse_clone.MapsWork.Route;
 import com.example.glypmse_clone.Models.Destination;
 import com.example.glypmse_clone.Models.Glympse;
 import com.example.glypmse_clone.Models.User;
@@ -19,10 +20,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -177,6 +180,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateGlympse(Glympse glympse) {
+        //Route route= new Route(activeUser.getLastPosition(),glympse.getDestination().getDestination(),getResources().getString(R.string.google_maps_key),this);
+
         List<LatLng> lstDirections=new ArrayList<>();
         //Maintaining routes from user position to the destination
         lstDirections.add(activeUser.getLastPosition());
@@ -199,17 +204,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lstDirections.add(new LatLng(31.4753881,74.34377429999999));
         lstDirections.add(new LatLng(31.4618127,74.3217413));
 
-        PolylineOptions polylineOptions= new PolylineOptions();
-        polylineOptions.clickable(true).width(5).color(Color.CYAN);
-
-        for (LatLng position : lstDirections) {
-            polylineOptions.add(position);
+        //adjusting bounds
+        LatLngBounds.Builder boundsBuilder= new LatLngBounds.Builder();
+        for (LatLng latlng:
+             lstDirections) {
+            boundsBuilder.include(latlng);
         }
+        LatLngBounds bounds= boundsBuilder.build();
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds,2);
+        map.animateCamera(cameraUpdate);
+
+        PolylineOptions polylineOptions= new PolylineOptions();
+        polylineOptions.clickable(true).width(5).color(Color.BLACK);
+        polylineOptions.addAll(lstDirections);
+
+
         map.addPolyline(polylineOptions);
+
         map.addMarker(new MarkerOptions()
                 .position(glympse.getDestination().getDestination())
                 .title(glympse.getDestination().getName()));
-        map.animateCamera(CameraUpdateFactory.zoomBy(10));
     }
 
     private void initializeModel() {
