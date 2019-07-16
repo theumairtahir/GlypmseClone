@@ -177,11 +177,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateGlympse(Glympse glympse) {
-        map.addPolyline(new PolylineOptions()
-                .clickable(true)
-                .width(5)
-                .color(Color.CYAN)
-                .add(activeUser.getLastPosition(),glympse.getDestination().getDestination()));
+        List<LatLng> lstDirections=new ArrayList<>();
+        //Maintaining routes from user position to the destination
+        lstDirections.add(activeUser.getLastPosition());
+        lstDirections.add(new LatLng(31.5586129,74.2903202));
+        lstDirections.add(new LatLng(31.5589491,74.29061829999999));
+        lstDirections.add(new LatLng(31.5589491,74.29061829999999));
+        lstDirections.add(new LatLng(31.5560774,74.2948564));
+        lstDirections.add(new LatLng(31.5560774,74.2948564));
+        lstDirections.add(new LatLng(31.554563,74.2923713));
+        lstDirections.add(new LatLng(31.554563,74.2923713));
+        lstDirections.add(new LatLng(31.5480489,74.293584));
+        lstDirections.add(new LatLng(31.5480489,74.293584));
+        lstDirections.add(new LatLng(31.5461955,74.2960666));
+        lstDirections.add(new LatLng(31.5461955,74.2960666));
+        lstDirections.add(new LatLng(31.5429694,74.3174197));
+        lstDirections.add(new LatLng(31.5429694,74.3174197));
+        lstDirections.add(new LatLng(31.5474531,74.3154593));
+        lstDirections.add(new LatLng(31.5474531,74.3154593));
+        lstDirections.add(new LatLng(31.5247954,74.32377480000001));
+        lstDirections.add(new LatLng(31.4753881,74.34377429999999));
+        lstDirections.add(new LatLng(31.4618127,74.3217413));
+        PolylineOptions polylineOptions= new PolylineOptions();
+        polylineOptions.clickable(true).width(5).color(Color.CYAN);
+        for (LatLng position:
+             lstDirections) {
+            polylineOptions.add(position);
+        }
+        map.addPolyline(polylineOptions);
         map.addMarker(new MarkerOptions()
                 .position(glympse.getDestination().getDestination())
                 .title(glympse.getDestination().getName()));
