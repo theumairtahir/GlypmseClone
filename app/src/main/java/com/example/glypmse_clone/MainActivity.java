@@ -3,12 +3,10 @@ package com.example.glypmse_clone;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -16,18 +14,12 @@ import com.example.glypmse_clone.MapsWork.Route;
 import com.example.glypmse_clone.Models.Destination;
 import com.example.glypmse_clone.Models.Glympse;
 import com.example.glypmse_clone.Models.User;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -50,15 +42,18 @@ import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private GoogleMap map;
     ImageButton btnChangeMapType;
     ImageButton btnActiveGlympse;
+    NavigationView navigationView;
 
     //Business components
     User activeUser;
@@ -146,18 +142,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.setDrawerTitle(DrawerLayout.TEXT_ALIGNMENT_GRAVITY,activeUser.getName());
+        drawer.setDrawerTitle(DrawerLayout.TEXT_ALIGNMENT_GRAVITY,"Glympse");
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        //setting user name on the drawer text
-        View headerView=navigationView.getHeaderView(0);
-        TextView txtUserName=headerView.findViewById(R.id.txtDrawerUserName);
-        txtUserName.setText(activeUser.getName());
 
         //Initializing Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -182,11 +174,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateGlympse(Glympse glympse) {
-        Route route= new Route(activeUser.getLastPosition(),glympse.getDestination().getDestination(),getResources().getString(R.string.google_maps_key),this);
+        Route route= new Route(new LatLng(activeUser.lastPosition.latitude,activeUser.lastPosition.longitude)
+                ,new LatLng(glympse.getDestination().getDestination().latitude,glympse.getDestination().getDestination().longitude),
+                getResources().getString(R.string.google_maps_key)
+                , this);
 
         List<LatLng> lstDirections=new ArrayList<>();
         //Maintaining routes from user position to the destination
-        lstDirections.add(activeUser.getLastPosition());
+        lstDirections.add(new LatLng(activeUser.lastPosition.latitude,activeUser.lastPosition.longitude));
         lstDirections.add(new LatLng(31.5586129,74.2903202));
         lstDirections.add(new LatLng(31.5589491,74.29061829999999));
         lstDirections.add(new LatLng(31.5589491,74.29061829999999));
@@ -225,19 +220,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         String description="Distance: "+17 +"km"+" Time: "+36 +"min"+" Ferozepur Rd/Lahore – Kasur Rd";
         map.addMarker(new MarkerOptions()
-                .position(glympse.getDestination().getDestination())
+                .position(new LatLng(glympse.getDestination().getDestination().latitude,glympse.getDestination().getDestination().longitude))
                 .title(glympse.getDestination().getName())
                 .snippet(description));
     }
 
     private void initializeModel() {
-        FirebaseAuth firebaseAuth=FirebaseAuth.getInstance();
         FirebaseDatabase db=FirebaseDatabase.getInstance();
         DatabaseReference users=db.getReference("users");
+        final SharedPreferences preferences = getSharedPreferences(getResources().getString(R.string.glympse_shared_preferences),MODE_PRIVATE);
+        users.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                activeUser=dataSnapshot.child(preferences.getString("phoneNumber","")).getValue(User.class);
+                if(activeUser.lastPosition!=null){
+                    updateActiveUserLocation(new LatLng(activeUser.lastPosition.latitude,activeUser.lastPosition.longitude));
+
+                }
+                else{
+                    LatLng deviceLocation=getDeviceLatestLocation();
+                    activeUser.setLastPosition(new com.example.glypmse_clone.Models.LatLng(deviceLocation.latitude,deviceLocation.longitude));
+                    updateActiveUserLocation(new LatLng(activeUser.lastPosition.latitude,activeUser.lastPosition.longitude));
+                }
+                //setting user name on the drawer text
+                View headerView=navigationView.getHeaderView(0);
+                TextView txtUserName=headerView.findViewById(R.id.txtDrawerUserName);
+                txtUserName.setText(activeUser.getName());
+                lstActiveGlympses.add(new Glympse(activeUser,new User("Sarim","03031234567","Pakistan",new com.example.glypmse_clone.Models.LatLng(31.389280,74.240503)),60,true,"7/15/2019 06:52:00 PM",new Destination(new com.example.glypmse_clone.Models.LatLng(31.461814,74.321742),"Model Town",60)));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getBaseContext(),"Something went wrong! Please check your Internet connection.",Toast.LENGTH_LONG).show();
+            }
+        });
         //will be replaced by DB values
         lstActiveGlympses=new ArrayList<>();
-        activeUser=new User("Umair Tahir","03074172329","Pakistan",getDeviceLatestLocation());
-        lstActiveGlympses.add(new Glympse(activeUser,new User("Sarim","03031234567","Pakistan",new LatLng(31.389280,74.240503)),60,true,"7/15/2019 06:52:00 PM",new Destination(new LatLng(31.461814,74.321742),"Model Town",60)));
+        //lstActiveGlympses.add(new Glympse(activeUser,new User("Sarim","03031234567","Pakistan",new LatLng(31.389280,74.240503)),60,true,"7/15/2019 06:52:00 PM",new Destination(new LatLng(31.461814,74.321742),"Model Town",60)));
     }
 
     @Override
@@ -288,27 +307,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 //Request runtime permission
                 ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION},MY_PERMISSION_REQUEST_CODE);
-                getDeviceCurrentLocation();
             }
             else{
                 //if request granted
-                getDeviceCurrentLocation();
+                //updateActiveUserLocation();
             }
         }
     }
 
     @SuppressLint("MissingPermission")
     private void getDeviceCurrentLocation() {
-        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if(location!=null){
-                    LatLng currentPosition=new LatLng(location.getLatitude(),location.getLongitude());
-                    map.addMarker(new MarkerOptions().position(currentPosition).title(activeUser.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                    map.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
-                }
-            }
-        });
+
     }
     private LatLng getDeviceLatestLocation(){
         final LatLng[] latestLocation = {null};
@@ -325,6 +334,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateActiveUserLocation(LatLng latestLocation) {
-        activeUser.setLastPosition(latestLocation);
+        activeUser.setLastPosition(new com.example.glypmse_clone.Models.LatLng(latestLocation.latitude,latestLocation.longitude));
+        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if(location!=null){
+                    LatLng currentPosition=new LatLng(location.getLatitude(),location.getLongitude());
+                    map.addMarker(new MarkerOptions().position(currentPosition).title(activeUser.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                    map.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                }
+            }
+        });
     }
 }

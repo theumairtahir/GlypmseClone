@@ -1,9 +1,8 @@
 package com.example.glypmse_clone.Models;
 
-import com.google.android.gms.maps.model.LatLng;
 
 public class Destination {
-    private LatLng destination;
+    private com.example.glypmse_clone.Models.LatLng destination;
     private String name;
 
 
@@ -12,7 +11,7 @@ public class Destination {
     public Destination() {
     }
 
-    public Destination(LatLng destination, String name, double timeRequiredMins) {
+    public Destination(com.example.glypmse_clone.Models.LatLng destination, String name, double timeRequiredMins) {
         this.destination = destination;
         this.name = name;
         this.timeRequiredMins = timeRequiredMins;

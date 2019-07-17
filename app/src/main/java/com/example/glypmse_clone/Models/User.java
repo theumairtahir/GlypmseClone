@@ -1,12 +1,9 @@
 package com.example.glypmse_clone.Models;
 
-import com.google.android.gms.maps.model.LatLng;
-
 public class User {
-    private String name, phoneNumber, country;
+    String name, phoneNumber, country;
+    public LatLng lastPosition;
 
-
-    private LatLng lastPosition;
 
     public User() {
     }
@@ -26,12 +23,12 @@ public class User {
         this.country = country;
     }
 
-    public LatLng getLastPosition() {
+    public LatLng getlastPosition(){
         return lastPosition;
     }
 
     public void setLastPosition(LatLng lastPosition) {
-        this.lastPosition = lastPosition;
+        this.lastPosition = new LatLng(lastPosition.latitude,lastPosition.longitude);
     }
 
     public String getName() {
