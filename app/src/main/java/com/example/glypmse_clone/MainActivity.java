@@ -3,6 +3,7 @@ package com.example.glypmse_clone;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -170,13 +171,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
         mapFragment.getMapAsync(this);
-
+        //starting service to update location of the device every 10 sec
+       //startService(new Intent(MainActivity.this,LocationUpdateService.class));
     }
 
     private void updateGlympse(Glympse glympse) {
         Route route= new Route(new LatLng(activeUser.lastPosition.latitude,activeUser.lastPosition.longitude)
-                ,new LatLng(glympse.getDestination().getDestination().latitude,glympse.getDestination().getDestination().longitude),
-                getResources().getString(R.string.google_maps_key)
+                ,new LatLng(glympse.getDestination().getDestination().latitude,glympse.getDestination().getDestination().longitude)
+                , getResources().getString(R.string.google_maps_key)
                 , this);
 
         List<LatLng> lstDirections=new ArrayList<>();
@@ -234,7 +236,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onDataChange(DataSnapshot dataSnapshot) {
                 activeUser=dataSnapshot.child(preferences.getString("phoneNumber","")).getValue(User.class);
                 if(activeUser.lastPosition!=null){
-                    updateActiveUserLocation(new LatLng(activeUser.lastPosition.latitude,activeUser.lastPosition.longitude));
+                    LatLng currentPosition=new LatLng(activeUser.lastPosition.getLatitude(),activeUser.lastPosition.getLongitude());
+                    map.addMarker(new MarkerOptions().position(currentPosition).title(activeUser.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                    map.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
 
                 }
                 else{
@@ -315,10 +319,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private void getDeviceCurrentLocation() {
-
-    }
     private LatLng getDeviceLatestLocation(){
         final LatLng[] latestLocation = {null};
         fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -345,5 +345,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(new Intent(getBaseContext(),LocationUpdateService.class));
+        super.onDestroy();
     }
 }
