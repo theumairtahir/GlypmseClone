@@ -45,7 +45,8 @@ public class Route {
                     JSONObject route=routes.getJSONObject(0);
                     String encodedPolyline=route.getJSONObject("overview_polyline").getString("points");
                     lstDirections=decodePoly(encodedPolyline);
-                    JSONObject leg=response.getJSONArray("legs").getJSONObject(0);
+                    JSONArray legs=route.getJSONArray("legs");
+                    JSONObject leg=legs.getJSONObject(0);
                     distanceRequired=leg.getJSONObject("distance").getString("text");
                     distanceRequiredValue=leg.getJSONObject("distance").getInt("value");
                     timeRequired=leg.getJSONObject("duration").getString("text");

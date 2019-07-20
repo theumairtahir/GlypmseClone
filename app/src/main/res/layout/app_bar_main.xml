@@ -69,6 +69,39 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_add_location_black_24dp" />
 
+    <LinearLayout
+        android:id="@+id/fab_menu_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/fab"
+        app:layout_constraintEnd_toStartOf="@+id/fab"
+        android:visibility="invisible">
+
+        <Button
+            android:id="@+id/btnReceiveGlympse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/fab_menu_receive_glympse"
+            android:drawableLeft="@drawable/ic_call_received_white_24dp"
+            android:text="Receive Location"
+            android:textColor="@android:color/white"
+            android:textSize="8sp" />
+
+        <Button
+            android:id="@+id/btnSendGlympse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/fab_manu_send_glympse_bg"
+            android:drawableLeft="@drawable/ic_call_made_white_24dp"
+            android:text="Send Location"
+            android:textColor="@android:color/white"
+            android:textSize="8sp" />
+
+    </LinearLayout>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="match_parent"

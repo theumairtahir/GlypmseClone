@@ -27,7 +27,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                         i= new Intent(SplashScreenActivity.this,MainActivity.class);
                     }
                     else {
-                        //Go to next page i.e, start the next activity.
+                        //Go to next page i.e, startMarker the next activity.
                         i = new Intent(SplashScreenActivity.this, RegisterActivity.class);
                     }
                     startActivity(i);
