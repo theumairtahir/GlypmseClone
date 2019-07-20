@@ -4,19 +4,20 @@ public class Glympse {
     private User sender, receiver;
     private double expiryTimeMins;
     private boolean isActive;
-    private String dateTime;
+    private String dateTime, message;
     private Destination destination;
 
     public Glympse() {
     }
 
-    public Glympse(User sender, User receiver, double expiryTimeMins, boolean isActive, String dateTime, Destination destination) {
+    public Glympse(User sender, User receiver,String message, double expiryTimeMins, boolean isActive, String dateTime, Destination destination) {
         this.sender = sender;
         this.receiver = receiver;
         this.expiryTimeMins = expiryTimeMins;
         this.isActive = isActive;
         this.dateTime = dateTime;
         this.destination = destination;
+        this.message=message;
     }
 
     public User getSender() {

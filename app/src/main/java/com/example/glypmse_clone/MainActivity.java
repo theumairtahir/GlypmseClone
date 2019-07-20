@@ -2,6 +2,7 @@ package com.example.glypmse_clone;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -47,7 +48,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,6 +82,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ImageButton btnActiveGlympse;
     NavigationView navigationView;
     Marker destinationMarker, startMarker;
+    AlertDialog.Builder dialogBuilder;
+    ProgressBar loadingBar;
+    AlertDialog dialogLoading;
+    LinearLayout layoutFabMenu;
+    Button btnReceiveLocation, btnSendLocation;
+
     //Business components
     User activeUser;
     ArrayList<Glympse> lstActiveGlympses;
@@ -91,7 +101,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         try {
             setContentView(R.layout.activity_main);
+            layoutFabMenu=findViewById(R.id.fab_menu_layout);
             fusedLocationProviderClient = new FusedLocationProviderClient(this);
+            //Loading bar
+            dialogBuilder= new AlertDialog.Builder(MainActivity.this);
+            dialogBuilder.setTitle("Loading");
+            loadingBar=new ProgressBar(MainActivity.this);
+            dialogBuilder.setView(loadingBar);
+            dialogLoading = dialogBuilder.create();
             //initializing model from db
             initializeModel();
             //binding the view components
@@ -151,8 +168,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    if(layoutFabMenu.getVisibility()==View.INVISIBLE){
+                        layoutFabMenu.setVisibility(View.VISIBLE);
+                    }
+                    else{
+                        layoutFabMenu.setVisibility(View.INVISIBLE);
+                    }
                 }
             });
 
@@ -191,6 +212,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         catch (Exception e){
             Log.e("Error in OnCreate:",e.getMessage());
         }
+        btnSendLocation=findViewById(R.id.btnSendGlympse);
+        btnSendLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i= new Intent(MainActivity.this,ShareLocationActivity.class);
+                startActivity(i);
+            }
+        });
+        btnReceiveLocation=findViewById(R.id.btnReceiveGlympse);
     }
 
     private void updateGlympse(Glympse glympse) {
@@ -316,6 +346,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initializeModel() {
+
+        dialogLoading.show();
         try {
             FirebaseDatabase db = FirebaseDatabase.getInstance();
             DatabaseReference users = db.getReference("users");
@@ -342,10 +374,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         View headerView = navigationView.getHeaderView(0);
                         TextView txtUserName = headerView.findViewById(R.id.txtDrawerUserName);
                         txtUserName.setText(activeUser.getName());
-                        lstActiveGlympses.add(new Glympse(activeUser, new User("Sarim", "03031234567", "Pakistan", new com.example.glypmse_clone.Models.LatLng(31.389280, 74.240503)), 60, true, "7/15/2019 06:52:00 PM", new Destination(new com.example.glypmse_clone.Models.LatLng(31.461814, 74.321742), "Model Town", 60)));
+                        lstActiveGlympses.add(new Glympse(activeUser, new User("Sarim", "03031234567", "Pakistan", new com.example.glypmse_clone.Models.LatLng(31.389280, 74.240503)),"This is a Glympse", 60, true, "7/15/2019 06:52:00 PM", new Destination(new com.example.glypmse_clone.Models.LatLng(31.461814, 74.321742), "Model Town", 60)));
+                        dialogLoading.dismiss();
                     }
                     catch (Exception e){
                         Log.e("Error:",e.getMessage());
+                        Toast.makeText(MainActivity.this,"Error! Check your Internet Connection",Toast.LENGTH_SHORT).show();
                     }
                 }
                 @Override
@@ -368,8 +402,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if(layoutFabMenu.getVisibility()==View.VISIBLE){
+                layoutFabMenu.setVisibility(View.INVISIBLE);
+            }
+            else {
+                super.onBackPressed();
+            }
         }
+
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

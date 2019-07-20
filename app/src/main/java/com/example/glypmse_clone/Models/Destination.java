@@ -5,7 +5,6 @@ public class Destination {
     private com.example.glypmse_clone.Models.LatLng destination;
     private String name;
 
-
     private double timeRequiredMins;
 
     public Destination() {
